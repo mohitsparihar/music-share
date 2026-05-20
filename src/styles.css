@@ -223,12 +223,23 @@ input {
 }
 
 .scrubber input[type="range"] {
+  --scrubber-thumb-size: 14px;
+  --scrubber-fill-end: calc(
+    (100% - var(--scrubber-thumb-size)) * var(--scrubber-ratio, 0)
+      + (var(--scrubber-thumb-size) / 2)
+  );
   flex: 1;
   appearance: none;
   -webkit-appearance: none;
   height: 6px;
   border-radius: 999px;
-  background: rgba(28, 22, 15, 0.15);
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    var(--accent) var(--scrubber-fill-end),
+    rgba(28, 22, 15, 0.15) var(--scrubber-fill-end),
+    rgba(28, 22, 15, 0.15) 100%
+  );
   outline: none;
   cursor: pointer;
 }
@@ -238,21 +249,41 @@ input {
   opacity: 0.6;
 }
 
+.scrubber input[type="range"]::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: transparent;
+}
+
 .scrubber input[type="range"]::-webkit-slider-thumb {
   appearance: none;
   -webkit-appearance: none;
-  width: 14px;
-  height: 14px;
+  width: var(--scrubber-thumb-size);
+  height: var(--scrubber-thumb-size);
   border-radius: 999px;
   background: var(--accent);
   border: 2px solid #fff8e8;
   cursor: pointer;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  margin-top: -4px;
+}
+
+.scrubber input[type="range"]::-moz-range-track {
+  height: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(28, 22, 15, 0.15);
+}
+
+.scrubber input[type="range"]::-moz-range-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--accent);
 }
 
 .scrubber input[type="range"]::-moz-range-thumb {
-  width: 14px;
-  height: 14px;
+  width: var(--scrubber-thumb-size);
+  height: var(--scrubber-thumb-size);
   border-radius: 999px;
   background: var(--accent);
   border: 2px solid #fff8e8;
@@ -274,15 +305,24 @@ input {
 }
 
 .reaction-dock__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid var(--line);
   background: var(--panel);
   border-radius: 999px;
   width: 2.4rem;
   height: 2.4rem;
-  font-size: 1.2rem;
-  line-height: 1;
+  padding: 0;
   cursor: pointer;
   transition: transform 0.1s ease;
+}
+
+.reaction-dock__emoji {
+  display: block;
+  font-size: 1.2rem;
+  line-height: 1;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
 }
 
 .reaction-dock__btn:hover {
@@ -305,6 +345,7 @@ input {
   position: absolute;
   bottom: 0;
   font-size: 2.2rem;
+  font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
   animation: reactionFloat 1.8s ease-out forwards;
   will-change: transform, opacity;
 }

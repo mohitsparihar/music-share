@@ -1,4 +1,5 @@
 import { API_BASE_URL } from "./config";
+import { readJsonResponse } from "./http";
 
 type Sample = { offsetMs: number; rttMs: number };
 
@@ -55,7 +56,10 @@ async function collectSample(): Promise<Sample> {
   if (!response.ok) {
     throw new Error("time sync failed");
   }
-  const body = (await response.json()) as { serverTimeMs: number };
+  const body = await readJsonResponse<{ serverTimeMs: number }>(response);
+  if (!body) {
+    throw new Error("time sync failed");
+  }
   const t1 = body.serverTimeMs;
   const rttMs = t2 - t0;
   const offsetMs = t1 - (t0 + t2) / 2;

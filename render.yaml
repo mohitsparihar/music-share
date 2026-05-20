@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: music-share
+    runtime: docker
+    plan: starter
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/time
+    envVars:
+      # Render injects PORT automatically; we point the SQLite file at the persistent disk.
+      - key: DB_PATH
+        value: /var/data/wave-room.sqlite
+      # FRONTEND_ORIGIN is used by CORS. When the backend serves the SPA on the same
+      # origin (which it does here), this only matters for OPTIONS preflights, which
+      # browsers don't send for same-origin fetches.
+      - key: FRONTEND_ORIGIN
+        sync: false
+    disk:
+      name: music-share-data
+      mountPath: /var/data
+      sizeGB: 1

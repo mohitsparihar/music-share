@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { useParams } from "react-router-dom";
 import type { ClientEvent, ParticipantRole, RoomSnapshot } from "../lib/types";
 import { API_BASE_URL, getWebSocketUrl } from "../lib/config";
+import { readJsonResponse } from "../lib/http";
 import { decideCorrection, loadYouTubeApi, type YouTubePlayer } from "../lib/player";
 import { getServerNow, syncClock } from "../lib/clock";
 import { getSessionId } from "../lib/session";
@@ -116,12 +117,15 @@ export function RoomPage() {
         const response = await fetch(
           `${API_BASE_URL}/api/rooms/${roomId}?sessionId=${encodeURIComponent(sessionId)}`,
         );
-        const payload = (await response.json()) as
+        const payload = await readJsonResponse<
           | { room: RoomSnapshot; viewerRole: ParticipantRole }
-          | { message: string };
+          | { message: string }
+        >(response);
 
-        if (!response.ok || !("room" in payload)) {
-          throw new Error("message" in payload ? payload.message : "Unable to load room.");
+        if (!response.ok || !payload || !("room" in payload)) {
+          const message =
+            payload && "message" in payload ? payload.message : "Unable to load room.";
+          throw new Error(message);
         }
 
         if (!cancelled) {
@@ -535,6 +539,10 @@ export function RoomPage() {
   const canControl = role === "host" || role === "admin";
   const roomLink = typeof window === "undefined" ? "" : window.location.href;
   const showTapOverlay = room ? (!hasGesture && (gestureVariant === "resume" || isMutedAutoplay || room.playbackStatus === "playing")) : false;
+  const displayedScrubValue = isScrubbing
+    ? scrubValue
+    : Math.min(displayPosition, duration || displayPosition);
+  const scrubberRatio = duration > 0 ? Math.min(1, displayedScrubValue / duration) : 0;
 
   return (
     <main className="shell room-shell">
@@ -569,7 +577,12 @@ export function RoomPage() {
               min={0}
               max={duration || 1}
               step={0.1}
-              value={isScrubbing ? scrubValue : Math.min(displayPosition, duration || displayPosition)}
+              value={displayedScrubValue}
+              style={
+                {
+                  "--scrubber-ratio": scrubberRatio.toString(),
+                } as CSSProperties
+              }
               disabled={!canControl || !duration}
               onPointerDown={handleScrubStart}
               onPointerUp={handleScrubCommit}

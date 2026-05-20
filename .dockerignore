@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+.gitignore
+.DS_Store
+wave-room.sqlite*
+test-persistence.sqlite*
+*.log
+.env
+.env.local
+README.md

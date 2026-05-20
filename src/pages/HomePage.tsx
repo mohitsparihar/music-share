@@ -1,6 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_BASE_URL } from "../lib/config";
+import { readJsonResponse } from "../lib/http";
 import { getSessionId } from "../lib/session";
 import { setRoomToken } from "../lib/tokens";
 import type { CreateRoomResponse } from "../lib/types";
@@ -28,9 +29,11 @@ export function HomePage() {
         }),
       });
 
-      const payload = (await response.json()) as CreateRoomResponse | { message: string };
-      if (!response.ok || !("room" in payload)) {
-        throw new Error("message" in payload ? payload.message : "Unable to create room.");
+      const payload = await readJsonResponse<CreateRoomResponse | { message: string }>(response);
+      if (!response.ok || !payload || !("room" in payload)) {
+        const message =
+          payload && "message" in payload ? payload.message : "Unable to create room.";
+        throw new Error(message);
       }
 
       setRoomToken(payload.room.roomId, payload.hostToken);

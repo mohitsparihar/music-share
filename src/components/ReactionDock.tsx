@@ -1,4 +1,4 @@
-const EMOJI = ["🎵", "🔥", "❤️", "😂", "🙌", "🎉"];
+const EMOJI = ["🎶", "🔥", "❤️", "😂", "🙌", "🎉"];
 
 type Props = {
   onSend: (emoji: string) => void;
@@ -17,7 +17,9 @@ export function ReactionDock({ onSend, disabled }: Props) {
           onClick={() => onSend(emoji)}
           aria-label={`React with ${emoji}`}
         >
-          {emoji}
+          <span className="reaction-dock__emoji" aria-hidden>
+            {emoji}
+          </span>
         </button>
       ))}
     </div>
